@@ -1,0 +1,45 @@
+<html>
+<header>
+    <script src='https://code.jquery.com/jquery-1.7.1.min.js'></script>
+    <script>
+        (function reconnect() {
+          
+          console.log("connecting to feed...");
+          
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', 'http://127.0.0.1:8088/watch', true);
+          var nextLine = 0;
+          var data = new FormData()
+          data.append('interval','10ms')
+          data.append('sep','|')
+        
+          xhr.onprogress = function () {
+            //readyState: headers received 2, body received 3, done 4
+            if (xhr.readyState != 2 && xhr.readyState != 3 && xhr.readyState != 4)
+                return;
+            if (xhr.readyState == 3 && xhr.status != 200)
+                return;
+            $("#boo").append("<div>"+xhr.response.slice(nextLine) +"</div>");  
+            console.log(JSON.parse(xhr.response.slice(nextLine)))
+            nextLine = xhr.response.length;
+          }
+        
+          xhr.onload = function () {
+            console.log("reconnecting...");
+          }
+          xhr.onerror = function () {
+            console.log("reconnecting after error...");
+          }
+          xhr.onabort = function () {
+            console.log("reconnecting after abort...");
+          }
+        
+          xhr.send(data);
+        }());
+        
+    </script>
+</header>
+<body>
+    <div name="boo", id="boo"></div>
+</body>
+</html>
